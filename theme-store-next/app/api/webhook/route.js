@@ -2,6 +2,17 @@ import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { query } from '../../../lib/supabase';
 
+// Force Node.js runtime — required for Stripe raw body webhook verification
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
+// Disable Next.js body parsing — Stripe MUST receive raw body for signature verification
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2024-06-20',
 });
@@ -19,9 +30,8 @@ function generateRandomCode() {
   return result;
 }
 
-// Stripe webhook memerlukan raw body untuk signature verification
-// Next.js App Router secara default baca body sebagai text bila kita guna request.text()
 export async function POST(request) {
+  // Read raw body as text — MUST come before any json() parsing for webhook sig verification
   const body = await request.text();
   const signature = request.headers.get('stripe-signature');
 
@@ -30,10 +40,16 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Missing signature' }, { status: 400 });
   }
 
+  if (!process.env.STRIPE_WEBHOOK_SECRET) {
+    console.error('❌ Webhook: STRIPE_WEBHOOK_SECRET is not set');
+    return NextResponse.json({ error: 'Webhook secret not configured' }, { status: 500 });
+  }
+
   let event;
 
   try {
-    // Verify signature — pastikan request betul-betul dari Stripe, bukan forged request
+    // Cryptographically verify that this request truly came from Stripe
+    // This prevents anyone from forging a fake payment webhook to get free codes
     event = stripe.webhooks.constructEvent(
       body,
       signature,
@@ -46,23 +62,23 @@ export async function POST(request) {
 
   console.log(`✅ Webhook event received: ${event.type}`);
 
-  // Handle event jenis checkout.session.completed
+  // Only handle checkout.session.completed events
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
 
-    // Pastikan payment memang berjaya (bukan sekadar sesi terbuka)
+    // Only generate code when payment is confirmed paid
     if (session.payment_status === 'paid') {
       const theme_id = session.metadata?.theme_id;
       const sessionId = session.id;
 
       if (!theme_id) {
-        console.error('❌ Webhook: theme_id missing in session metadata for session:', sessionId);
-        // Return 200 supaya Stripe tak cuba hantar semula
+        console.error('❌ Webhook: theme_id missing in metadata for session:', sessionId);
+        // Return 200 so Stripe doesn't retry this
         return NextResponse.json({ received: true, warning: 'Missing theme_id in metadata' });
       }
 
       try {
-        // Semak jika kod sudah dijanakan sebelum ini (elak duplikasi)
+        // Idempotency check: prevent duplicate code generation for same payment
         const existingResult = await query(
           'SELECT code FROM theme_codes WHERE order_id = $1',
           [sessionId]
@@ -73,7 +89,7 @@ export async function POST(request) {
           return NextResponse.json({ received: true, duplicate: true });
         }
 
-        // Jana kod unik
+        // Generate cryptographically unique theme code
         let code = '';
         let isUnique = false;
         let attempts = 0;
@@ -91,25 +107,25 @@ export async function POST(request) {
           throw new Error('Failed to generate unique code after 10 attempts');
         }
 
-        // Simpan kod ke database
+        // Persist the theme code — this is the single source of truth
         const themeIdsJson = JSON.stringify([theme_id]);
         await query(
           `INSERT INTO theme_codes (code, theme_ids, status, order_id) VALUES ($1, $2, 'unused', $3)`,
           [code, themeIdsJson, sessionId]
         );
 
-        console.log(`🎉 Webhook: Code "${code}" successfully generated for session ${sessionId}, theme ${theme_id}`);
+        console.log(`🎉 Webhook: Code "${code}" generated for session ${sessionId}, theme ${theme_id}`);
 
       } catch (dbError) {
         console.error('❌ Webhook: Database error:', dbError.message);
-        // Return 500 supaya Stripe akan cuba hantar semula (Stripe ada retry policy)
+        // Return 500 so Stripe will retry (Stripe retries for up to 3 days)
         return NextResponse.json({ error: 'Database error' }, { status: 500 });
       }
     } else {
-      console.log(`ℹ️ Webhook: Session ${session.id} payment_status is "${session.payment_status}", skipping code generation.`);
+      console.log(`ℹ️ Webhook: Session ${session.id} payment_status="${session.payment_status}", skipping.`);
     }
   }
 
-  // Untuk event lain, acknowledge sahaja
+  // Acknowledge all other events
   return NextResponse.json({ received: true });
 }

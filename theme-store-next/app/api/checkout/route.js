@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { query } from '../../../lib/supabase';
 import Stripe from 'stripe';
 
+export const dynamic = 'force-dynamic';
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2024-06-20',
 });
@@ -24,19 +26,25 @@ export async function POST(request) {
     const body = await request.json();
     const { theme_id, currency } = body;
 
+    // --- Input Validation ---
     if (!theme_id) {
       return NextResponse.json({ error: 'Theme ID is required' }, { status: 400 });
     }
 
-    // 1. Get theme from DB
+    // Sanitize theme_id to prevent injection
+    if (typeof theme_id !== 'string' && typeof theme_id !== 'number') {
+      return NextResponse.json({ error: 'Invalid theme_id format' }, { status: 400 });
+    }
+
+    // --- Fetch Theme from DB ---
     const themeResult = await query('SELECT * FROM themes WHERE id = $1', [theme_id]);
     if (themeResult.rows.length === 0) {
       return NextResponse.json({ error: 'Theme not found' }, { status: 404 });
     }
     const theme = themeResult.rows[0];
     const price = theme.price !== null ? parseFloat(theme.price) : null;
-    
-    // 2. Handle FREE themes (bypass Stripe)
+
+    // --- FREE Theme (bypass Stripe) ---
     if (price === 0) {
       let code = '';
       let isUnique = false;
@@ -45,14 +53,14 @@ export async function POST(request) {
         const checkResult = await query('SELECT id FROM theme_codes WHERE code = $1', [code]);
         if (checkResult.rows.length === 0) isUnique = true;
       }
-      
+
       const themeIdsJson = JSON.stringify([theme_id]);
-      const mockOrderId = `ORD-${Date.now()}`;
+      const mockOrderId = `FREE-${Date.now()}`;
       await query(
         `INSERT INTO theme_codes (code, theme_ids, status, order_id) VALUES ($1, $2, 'unused', $3)`,
         [code, themeIdsJson, mockOrderId]
       );
-      
+
       return NextResponse.json({
         success: true,
         code: code,
@@ -60,43 +68,46 @@ export async function POST(request) {
       });
     }
 
-    // 3. Handle PAID themes via Currency Preference / Geo-Routing
+    // --- PAID Theme: Determine Currency ---
     let isMY = true;
     if (currency) {
       const cUpper = String(currency).toUpperCase();
       isMY = cUpper === 'MYR' || cUpper === 'RM';
     } else {
+      // Fallback: detect from Cloudflare CDN header
       const country = request.headers.get('cf-ipcountry') || 'MY';
       isMY = country === 'MY';
     }
 
     const isPremium = theme.price_tier === 'premium';
-    
-    // Select Price ID based on currency
+
+    // --- Select Live or Test Price ID ---
     let priceId = '';
     if (isMY) {
-      priceId = isPremium 
-        ? process.env.STRIPE_PRICE_ID_MYR_PREM 
+      priceId = isPremium
+        ? process.env.STRIPE_PRICE_ID_MYR_PREM
         : process.env.STRIPE_PRICE_ID_MYR_STD;
     } else {
-      priceId = isPremium 
-        ? process.env.STRIPE_PRICE_ID_USD_PREM 
+      priceId = isPremium
+        ? process.env.STRIPE_PRICE_ID_USD_PREM
         : process.env.STRIPE_PRICE_ID_USD_STD;
     }
 
-    if (!priceId || priceId.includes('placeholder')) {
-       console.error('Missing Stripe Price ID in env vars. Returning error.');
-       return NextResponse.json({ 
-         error: 'Stripe is not configured. Please add Stripe keys and Price IDs to .env.local',
-         needs_config: true
-       }, { status: 500 });
+    if (!priceId) {
+      console.error('❌ Checkout: Missing Stripe Price ID in environment variables.');
+      return NextResponse.json({
+        error: 'Payment system is not configured. Please contact support.',
+        needs_config: true
+      }, { status: 500 });
     }
 
-    // 4. Create Stripe Checkout Session
-    const protocol = request.headers.get('x-forwarded-proto') || 'http';
+    // --- Build Base URL ---
+    // Use NEXT_PUBLIC_BASE_URL in production for reliability
+    const protocol = request.headers.get('x-forwarded-proto') || 'https';
     const host = request.headers.get('host');
-    const baseUrl = `${protocol}://${host}`;
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `${protocol}://${host}`;
 
+    // --- Create Stripe Checkout Session ---
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
@@ -108,9 +119,13 @@ export async function POST(request) {
       mode: 'payment',
       success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/`,
+      // Metadata is passed through to the webhook
       metadata: {
-        theme_id: theme_id,
+        theme_id: String(theme_id),
+        theme_name: theme.name || '',
       },
+      // Optional: pre-fill customer email if available
+      // customer_email: userEmail,
     });
 
     return NextResponse.json({
@@ -119,7 +134,7 @@ export async function POST(request) {
     });
 
   } catch (error) {
-    console.error('Error in checkout API:', error);
+    console.error('❌ Checkout error:', error);
     return NextResponse.json(
       { error: 'Internal server error: ' + error.message },
       { status: 500 }

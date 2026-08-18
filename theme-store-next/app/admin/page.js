@@ -18,6 +18,10 @@ export default function AdminContent() {
     '--accent-color': '#8B5CF6'
   });
   const [createLoading, setCreateLoading] = useState(false);
+  const [testPurchaseLoading, setTestPurchaseLoading] = useState(false);
+  const [testPurchaseCode, setTestPurchaseCode] = useState('');
+  const [testPurchaseThemeId, setTestPurchaseThemeId] = useState('');
+  const [allThemes, setAllThemes] = useState([]);
   const [fileName, setFileName] = useState('');
   const [bgUrl, setBgUrl] = useState('');
   const [bgOpacity, setBgOpacity] = useState(1.0);
@@ -447,6 +451,49 @@ export default function AdminContent() {
       alert('Failed to save theme: ' + err.message);
     } finally {
       setCreateLoading(false);
+    }
+  };
+
+  // Load existing themes for test purchase dropdown
+  useEffect(() => {
+    fetch('/api/themes')
+      .then(res => res.json())
+      .then(data => {
+        if (data.themes) setAllThemes(data.themes);
+      })
+      .catch(err => console.error('Failed to load themes:', err));
+  }, []);
+
+  // Admin Test Purchase — generate code without real Stripe payment
+  const handleTestPurchase = async () => {
+    if (!testPurchaseThemeId) {
+      alert('Sila pilih tema untuk test.');
+      return;
+    }
+    setTestPurchaseLoading(true);
+    setTestPurchaseCode('');
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData?.session?.access_token;
+      if (!token) {
+        alert('Anda perlu log masuk sebagai admin untuk buat test purchase.');
+        return;
+      }
+      const res = await fetch('/api/admin/test-purchase', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ theme_id: testPurchaseThemeId }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || 'Test purchase failed');
+      setTestPurchaseCode(result.code);
+    } catch (err) {
+      alert('Test purchase gagal: ' + err.message);
+    } finally {
+      setTestPurchaseLoading(false);
     }
   };
 
@@ -885,6 +932,122 @@ export default function AdminContent() {
         </div>
 
       </div>
+
+      {/* ─── ADMIN TEST PURCHASE PANEL ─── */}
+      <div style={{
+        marginTop: '48px',
+        background: 'rgba(15, 23, 42, 0.6)',
+        border: '1px solid rgba(251, 191, 36, 0.3)',
+        borderRadius: '20px',
+        padding: '32px',
+      }}>
+        <h2 style={{ margin: '0 0 8px 0', fontSize: '1.4rem', fontWeight: 800, color: '#FCD34D' }}>
+          🔑 Admin Test Purchase
+        </h2>
+        <p style={{ margin: '0 0 24px 0', fontSize: '0.88rem', color: 'rgba(255,255,255,0.5)' }}>
+          Jana kod tema percuma untuk testing — kod ini akan tersimpan ke dalam database seperti pembelian sebenar, tanpa perlu bayar.
+        </p>
+
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+          <div style={{ flex: 1, minWidth: '200px' }}>
+            <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              Pilih Tema
+            </label>
+            <select
+              value={testPurchaseThemeId}
+              onChange={(e) => setTestPurchaseThemeId(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                borderRadius: '10px',
+                border: '1px solid rgba(251,191,36,0.25)',
+                background: 'rgba(0,0,0,0.3)',
+                color: 'white',
+                outline: 'none',
+                cursor: 'pointer',
+                fontSize: '0.9rem',
+              }}
+            >
+              <option value="">-- Pilih tema --</option>
+              {allThemes.map(t => (
+                <option key={t.id} value={t.id}>
+                  {t.name} ({t.price_tier}) — RM{parseFloat(t.price || 0).toFixed(2)}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <button
+            onClick={handleTestPurchase}
+            disabled={testPurchaseLoading || !testPurchaseThemeId}
+            style={{
+              padding: '12px 28px',
+              borderRadius: '10px',
+              border: '1px solid rgba(251,191,36,0.4)',
+              background: testPurchaseLoading ? 'rgba(251,191,36,0.1)' : 'linear-gradient(135deg, #D97706, #B45309)',
+              color: '#FCD34D',
+              fontWeight: 800,
+              fontSize: '0.9rem',
+              cursor: testPurchaseLoading || !testPurchaseThemeId ? 'not-allowed' : 'pointer',
+              opacity: testPurchaseLoading || !testPurchaseThemeId ? 0.6 : 1,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {testPurchaseLoading ? '⏳ Generating...' : '🎟️ Jana Kod Test'}
+          </button>
+        </div>
+
+        {testPurchaseCode && (
+          <div style={{
+            marginTop: '24px',
+            background: 'rgba(251,191,36,0.06)',
+            border: '1px solid rgba(251,191,36,0.3)',
+            borderRadius: '12px',
+            padding: '20px 24px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '16px',
+            flexWrap: 'wrap',
+          }}>
+            <div>
+              <p style={{ margin: '0 0 4px 0', fontSize: '0.78rem', fontWeight: 700, color: '#FCD34D', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                Kod Test Berjaya Dijana:
+              </p>
+              <p style={{
+                margin: 0,
+                fontSize: '1.8rem',
+                fontWeight: 900,
+                fontFamily: 'monospace',
+                color: '#FDE68A',
+                letterSpacing: '3px',
+                textShadow: '0 0 15px rgba(251,191,36,0.5)',
+              }}>
+                {testPurchaseCode}
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(testPurchaseCode);
+              }}
+              style={{
+                padding: '10px 20px',
+                borderRadius: '8px',
+                border: '1px solid rgba(251,191,36,0.4)',
+                background: 'rgba(251,191,36,0.1)',
+                color: '#FCD34D',
+                fontWeight: 700,
+                cursor: 'pointer',
+                fontSize: '0.85rem',
+              }}
+            >
+              📋 Copy
+            </button>
+          </div>
+        )}
+      </div>
+      {/* ─── END TEST PURCHASE PANEL ─── */}
+
     </div>
   );
 }
