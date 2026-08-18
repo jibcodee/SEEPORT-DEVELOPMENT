@@ -61,7 +61,8 @@ function CheckoutRedirectContent() {
         console.error('Checkout error:', err);
         setStatus('Transaction failed. Redirecting...');
         await new Promise(resolve => setTimeout(resolve, 1000));
-        router.push(`/success?theme_id=${themeId}&error=payment_failed`);
+        const errMsg = encodeURIComponent(err.message || 'Payment processing failed');
+        router.push(`/success?theme_id=${themeId}&error=${errMsg}`);
       }
     };
 

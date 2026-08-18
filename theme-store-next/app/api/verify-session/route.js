@@ -2,9 +2,7 @@ import { NextResponse } from 'next/server';
 import { query } from '../../../lib/supabase';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2024-06-20',
-});
+export const dynamic = 'force-dynamic';
 
 function generateRandomCode() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -31,6 +29,12 @@ export async function POST(request) {
     if (session_id.startsWith('MOCK_')) {
       return NextResponse.json({ error: 'Cannot verify mock session.' }, { status: 400 });
     }
+
+    const stripeSecret = process.env.STRIPE_SECRET_KEY;
+    if (!stripeSecret) {
+      return NextResponse.json({ error: 'STRIPE_SECRET_KEY is missing.' }, { status: 500 });
+    }
+    const stripe = new Stripe(stripeSecret, { apiVersion: '2024-06-20' });
 
     // Retrieve the session from Stripe
     const session = await stripe.checkout.sessions.retrieve(session_id);

@@ -4,10 +4,6 @@ import Stripe from 'stripe';
 
 export const dynamic = 'force-dynamic';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2024-06-20',
-});
-
 function generateRandomCode() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let result = 'SP-';
@@ -79,7 +75,7 @@ export async function POST(request) {
       isMY = country === 'MY';
     }
 
-    const isPremium = theme.price_tier === 'premium';
+    const isPremium = String(theme.price_tier || '').toLowerCase() === 'premium';
 
     // --- Select Live or Test Price ID ---
     let priceId = '';
@@ -94,12 +90,22 @@ export async function POST(request) {
     }
 
     if (!priceId) {
-      console.error('❌ Checkout: Missing Stripe Price ID in environment variables.');
+      console.error('❌ Checkout: Missing Stripe Price ID in environment variables. Tier:', theme.price_tier, 'isMY:', isMY);
       return NextResponse.json({
-        error: 'Payment system is not configured. Please contact support.',
+        error: `Stripe Price ID not found for ${isPremium ? 'premium' : 'standard'} (${isMY ? 'MYR' : 'USD'}). Please check Vercel Environment Variables.`,
         needs_config: true
       }, { status: 500 });
     }
+
+    const stripeSecret = process.env.STRIPE_SECRET_KEY;
+    if (!stripeSecret) {
+      console.error('❌ Checkout: STRIPE_SECRET_KEY is missing.');
+      return NextResponse.json({
+        error: 'STRIPE_SECRET_KEY is missing in server environment variables.',
+      }, { status: 500 });
+    }
+
+    const stripe = new Stripe(stripeSecret, { apiVersion: '2024-06-20' });
 
     // --- Build Base URL ---
     // Use NEXT_PUBLIC_BASE_URL in production for reliability

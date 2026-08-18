@@ -19,8 +19,9 @@ function SuccessContent() {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    if (urlError === 'payment_failed') {
-      setError('Payment processing failed. Please try again.');
+    if (urlError) {
+      const decodedError = decodeURIComponent(urlError);
+      setError(decodedError === 'payment_failed' ? 'Payment processing failed. Please try again.' : decodedError);
       setLoading(false);
       return;
     }
