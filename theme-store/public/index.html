@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seeport Theme Store</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b;
+      --card: #18181b;
+      --border: #27272a;
+      --text: #fafafa;
+      --text-muted: #a1a1aa;
+      --primary: #8b5cf6;
+      --primary-hover: #7c3aed;
+      --radius-lg: 16px;
+      --radius-md: 10px;
+      --font-sans: 'Inter', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 24px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 48px;
+      max-width: 600px;
+    }
+
+    h1 {
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #c084fc 0%, #8b5cf6 50%, #4f46e5 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+
+    p.subtitle {
+      font-size: 15px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .admin-link {
+      display: inline-block;
+      margin-top: 16px;
+      font-size: 13px;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+
+    .admin-link:hover {
+      color: var(--primary-hover);
+      text-decoration: underline;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 32px;
+      width: 100%;
+      max-width: 1100px;
+      margin-top: 16px;
+    }
+
+    .theme-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .theme-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--primary);
+    }
+
+    /* Live Preview Section of theme-card */
+    .preview-header {
+      background: #121214;
+      padding: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      height: 190px;
+    }
+
+    /* Mock Extension UI */
+    .mock-panel {
+      width: 100%;
+      height: 100%;
+      border-radius: var(--radius-md);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      font-size: 11px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .mock-title-row {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      opacity: 0.8;
+      padding-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .mock-card {
+      border-radius: 6px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .mock-card-title {
+      font-weight: 600;
+      font-size: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .mock-accent-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .mock-content {
+      font-size: 9.5px;
+      opacity: 0.8;
+    }
+
+    .mock-btn {
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 9.5px;
+      font-weight: 600;
+      text-align: center;
+      width: fit-content;
+      margin-top: auto;
+    }
+
+    /* Details Section */
+    .theme-details {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+      gap: 12px;
+    }
+
+    .theme-name {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .color-swatches {
+      display: flex;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .swatch {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-buy {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      transition: background 0.2s;
+      margin-top: auto;
+    }
+
+    .btn-buy:hover {
+      background: var(--primary-hover);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Seeport Theme Store</h1>
+    <p class="subtitle">get your code here to change s your theme !</p>
+    <a href="/admin" class="admin-link">⚙️ Pergi ke Admin Panel (Theme Generator)</a>
+  </header>
+
+  <div class="grid" id="themesGrid">
+    <!-- Themes loaded dynamically here -->
+  </div>
+
+  <script>
+    async function loadThemes() {
+      try {
+        const response = await fetch('/api/themes');
+        const themes = await response.json();
+        const grid = document.getElementById('themesGrid');
+        grid.innerHTML = '';
+
+        themes.forEach(theme => {
+          const colors = theme.colors;
+          const bg = colors['--bg-color'];
+          const text = colors['--text-color'];
+          const card = colors['--card-bg'];
+          const accent = colors['--accent-color'];
+
+          const cardHtml = `
+            <div class="theme-card">
+              <div class="preview-header">
+                <div class="mock-panel" style="background-color: ${bg}; color: ${text};">
+                  <div class="mock-title-row" style="border-bottom: 1px solid ${hexToRgba(text, 0.15)}">
+                    <span>Seeport Extension</span>
+                    <span class="mock-accent-dot" style="background-color: ${accent}"></span>
+                  </div>
+                  <div class="mock-card" style="background-color: ${card}; border-color: ${hexToRgba(text, 0.15)}">
+                    <div class="mock-card-title">
+                      <span>Article Title</span>
+                      <span class="mock-accent-dot" style="background-color: ${accent}"></span>
+                    </div>
+                    <p class="mock-content">Highlight content snippet here...</p>
+                  </div>
+                  <div class="mock-btn" style="background-color: ${accent}; color: ${getContrastYIQ(accent)}">
+                    Export to Word
+                  </div>
+                </div>
+              </div>
+              <div class="theme-details">
+                <div class="theme-name">${theme.name}</div>
+                <div class="color-swatches">
+                  <div class="swatch" style="background-color: ${bg}" title="Background"></div>
+                  <div class="swatch" style="background-color: ${card}" title="Card background"></div>
+                  <div class="swatch" style="background-color: ${text}" title="Text color"></div>
+                  <div class="swatch" style="background-color: ${accent}" title="Accent color"></div>
+                </div>
+                <a href="/success?code=${encodeURIComponent(theme.code)}&name=${encodeURIComponent(theme.name)}" class="btn-buy">Buy Now</a>
+              </div>
+            </div>
+          `;
+          grid.innerHTML += cardHtml;
+        });
+
+      } catch (err) {
+        console.error('Error loading themes:', err);
+      }
+    }
+
+    // Helper functions
+    function hexToRgba(hex, alpha) {
+      hex = hex.replace('#', '');
+      if (hex.length === 3) {
+        hex = hex.split('').map(c => c + c).join('');
+      }
+      const r = parseInt(hex.substring(0, 2), 16);
+      const g = parseInt(hex.substring(2, 4), 16);
+      const b = parseInt(hex.substring(4, 6), 16);
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    function getContrastYIQ(hexcolor){
+      hexcolor = hexcolor.replace("#", "");
+      var r = parseInt(hexcolor.substr(0,2),16);
+      var g = parseInt(hexcolor.substr(2,2),16);
+      var b = parseInt(hexcolor.substr(4,2),16);
+      var yiq = ((r*299)+(g*587)+(b*114))/1000;
+      return (yiq >= 128) ? '#18181b' : '#ffffff';
+    }
+
+    loadThemes();
+  </script>
+</body>
+</html>

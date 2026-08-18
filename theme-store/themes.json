@@ -1,0 +1,57 @@
+[
+  {
+    "id": "theme_pastel_lavender",
+    "name": "Pastel Lavender",
+    "colors": {
+      "--bg-color": "#F3F0FA",
+      "--text-color": "#4A3E56",
+      "--card-bg": "#EAE3F2",
+      "--accent-color": "#8B5CF6"
+    },
+    "code": "TRAY-eyJpZCI6InRoZW1lX3Bhc3RlbF9sYXZlbmRlciIsIm5hbWUiOiJQYXN0ZWwgTGF2ZW5kZXIiLCJjb2xvcnMiOnsiLS1iZy1jb2xvciI6IiNGM0YwRkEiLCItLXRleHQtY29sb3IiOiIjNEEzRTU2IiwiLS1jYXJkLWJnIjoiI0VBRTNGMiIsIi0tYWNjZW50LWNvbG9yIjoiIzhCNUNGNiJ9fQ=="
+  },
+  {
+    "id": "theme_cyberpunk_neon",
+    "name": "Cyberpunk Neon",
+    "colors": {
+      "--bg-color": "#0B0813",
+      "--text-color": "#FDFDFE",
+      "--card-bg": "#161224",
+      "--accent-color": "#FF007F"
+    },
+    "code": "TRAY-eyJpZCI6InRoZW1lX2N5YmVycHVua19uZW9uIiwibmFtZSI6IkN5YmVycHVuayBOZW9uIiwiY29sb3JzIjp7Ii0tYmctY29sb3IiOiIjMEIwODEzIiwiLS10ZXh0LWNvbG9yIjoiI0ZERkRGRSIsIi0tY2FyZC1iZyI6IiMxNjEyMjQiLCItLWFjY2VudC1jb2xvciI6IiNGRjAwN0YifX0="
+  },
+  {
+    "id": "theme_pink_love",
+    "name": "Pink Love",
+    "colors": {
+      "--bg-color": "#FFF0F5",
+      "--text-color": "#D02090",
+      "--card-bg": "#FFE4E1",
+      "--accent-color": "#FF1493"
+    },
+    "code": "TRAY-eyJpZCI6InRoZW1lX3BpbmtfbG92ZSIsIm5hbWUiOiJQaW5rIExvdmUiLCJjb2xvcnMiOnsiLS1iZy1jb2xvciI6IiNGRkYwRjUiLCItLXRleHQtY29sb3IiOiIjRDAyMDkwIiwiLS1jYXJkLWJnIjoiI0ZGRTRFMSIsIi0tYWNjZW50LWNvbG9yIjoiI0ZGMTQ5MyJ9fQ=="
+  },
+  {
+    "id": "theme_madness_eyes",
+    "name": "Madness Eyes",
+    "colors": {
+      "--bg-color": "#0B090F",
+      "--text-color": "#A855F7",
+      "--card-bg": "#16131F",
+      "--accent-color": "#EC4899"
+    },
+    "code": "TRAY-eyJpZCI6InRoZW1lX21hZG5lc3NfZXllcyIsIm5hbWUiOiJNYWRuZXNzIEV5ZXMiLCJjb2xvcnMiOnsiLS1iZy1jb2xvciI6IiMwQjA5MEYiLCItLXRleHQtY29sb3IiOiIjQTg1NUY3IiwiLS1jYXJkLWJnIjoiIzE2MTMxRiIsIi0tYWNjZW50LWNvbG9yIjoiI0VDNDg5OSJ9fQ=="
+  },
+  {
+    "id": "theme_matrix_digital",
+    "name": "Matrix Digital",
+    "colors": {
+      "--bg-color": "#030704",
+      "--text-color": "#39FF14",
+      "--card-bg": "#0B130E",
+      "--accent-color": "#00FF66"
+    },
+    "code": "TRAY-eyJpZCI6InRoZW1lX21hdHJpeF9kaWdpdGFsIiwibmFtZSI6Ik1hdHJpeCBEaWdpdGFsIiwiY29sb3JzIjp7Ii0tYmctY29sb3IiOiIjMDMwNzA0IiwiLS10ZXh0LWNvbG9yIjoiIzM5RkYxNCIsIi0tY2FyZC1iZyI6IiMwQjEzMEUiLCItLWFjY2VudC1jb2xvciI6IiMwMEZGNjYifX0="
+  }
+]

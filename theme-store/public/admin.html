@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seeport Theme Generator (Admin)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b;
+      --card: #18181b;
+      --border: #27272a;
+      --text: #fafafa;
+      --text-muted: #a1a1aa;
+      --primary: #8b5cf6;
+      --primary-hover: #7c3aed;
+      --radius: 12px;
+      --font-sans: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 800px;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 32px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-side {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 50%, #6d28d9 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    p.subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: -16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input[type="text"] {
+      background: #09090b;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--primary);
+    }
+
+    .color-pickers {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .color-field {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #09090b;
+      border: 1px solid var(--border);
+      padding: 8px 12px;
+      border-radius: 8px;
+    }
+
+    .color-field input[type="color"] {
+      border: none;
+      background: none;
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+      border-radius: 50%;
+      outline: none;
+    }
+
+    .color-field input[type="color"]::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+
+    .color-field input[type="color"]::-webkit-color-swatch {
+      border: 1px solid var(--border);
+      border-radius: 50%;
+    }
+
+    .color-field span {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text);
+      text-transform: uppercase;
+    }
+
+    .btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    /* Preview Side */
+    .preview-side {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-left: 1px solid var(--border);
+      padding-left: 32px;
+    }
+
+    @media (max-width: 768px) {
+      .preview-side {
+        border-left: none;
+        border-top: 1px solid var(--border);
+        padding-left: 0;
+        padding-top: 32px;
+      }
+    }
+
+    .preview-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .mock-panel {
+      border-radius: 10px;
+      padding: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background-color: var(--bg-preview, #f8fafc);
+      color: var(--text-preview, #0f172a);
+      transition: background-color 0.2s, color 0.2s;
+      min-height: 200px;
+    }
+
+    .mock-header {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      opacity: 0.8;
+      border-bottom: 1px solid var(--border-preview, rgba(0,0,0,0.1));
+      padding-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .mock-card {
+      border-radius: 8px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      background-color: var(--card-preview, #ffffff);
+      border: 1px solid var(--border-preview, rgba(0,0,0,0.1));
+    }
+
+    .mock-title {
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    .mock-content {
+      font-size: 10.5px;
+      opacity: 0.85;
+    }
+
+    .mock-accent-bar {
+      display: inline-block;
+      width: 12px;
+      height: 4px;
+      border-radius: 2px;
+      background-color: var(--accent-preview, #8b5cf6);
+    }
+
+    .mock-button {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 10.5px;
+      font-weight: 600;
+      color: #fff;
+      background-color: var(--accent-preview, #8b5cf6);
+      text-align: center;
+      width: fit-content;
+      margin-top: auto;
+    }
+
+    /* Result Area */
+    .result-area {
+      margin-top: 24px;
+      background: #09090b;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      display: none;
+    }
+
+    .result-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .code-box {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      background: #18181b;
+      padding: 10px;
+      border-radius: 6px;
+      word-break: break-all;
+      color: #34d399;
+      border: 1px solid var(--border);
+      max-height: 80px;
+      overflow-y: auto;
+    }
+
+    .btn-copy {
+      background: #27272b;
+      color: var(--text);
+      border: 1px solid var(--border);
+      font-size: 11px;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 8px;
+      font-weight: 600;
+      transition: background 0.15s;
+    }
+
+    .btn-copy:hover {
+      background: #3f3f46;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #10b981;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 13px;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="form-side">
+      <div>
+        <h1>Seeport Theme Generator</h1>
+        <p class="subtitle">Bina dan jana kod base64 tema tersuai untuk Seeport</p>
+      </div>
+
+      <form id="themeForm">
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label for="themeName">Nama Tema</label>
+          <input type="text" id="themeName" placeholder="Contoh: Lavender Fields" required autocomplete="off">
+        </div>
+
+        <div class="form-group">
+          <label style="margin-bottom: 4px;">Pilihan Warna</label>
+          <div class="color-pickers">
+            <div class="color-field">
+              <input type="color" id="colorBg" value="#F3F0FA">
+              <div>
+                <label style="font-size: 9px; display: block;">Latar Belakang</label>
+                <span id="labelBg">#F3F0FA</span>
+              </div>
+            </div>
+
+            <div class="color-field">
+              <input type="color" id="colorText" value="#4A3E56">
+              <div>
+                <label style="font-size: 9px; display: block;">Warna Teks</label>
+                <span id="labelText">#4A3E56</span>
+              </div>
+            </div>
+
+            <div class="color-field">
+              <input type="color" id="colorCard" value="#EAE3F2">
+              <div>
+                <label style="font-size: 9px; display: block;">Kad Item</label>
+                <span id="labelCard">#EAE3F2</span>
+              </div>
+            </div>
+
+            <div class="color-field">
+              <input type="color" id="colorAccent" value="#8B5CF6">
+              <div>
+                <label style="font-size: 9px; display: block;">Penyerlah (Accent)</label>
+                <span id="labelAccent">#8B5CF6</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn" style="margin-top: 16px; width: 100%;">Create Theme & Code</button>
+      </form>
+
+      <div id="resultArea" class="result-area">
+        <div class="result-title">Theme Code Generated</div>
+        <div id="codeBox" class="code-box"></div>
+        <button id="btnCopyCode" class="btn-copy">Copy Code</button>
+      </div>
+    </div>
+
+    <div class="preview-side">
+      <div>
+        <div class="preview-title">Live Preview (Mock Extension UI)</div>
+        
+        <div id="mockPanel" class="mock-panel">
+          <div class="mock-header" id="mockHeader">
+            <span>Seeport Tray</span>
+            <span class="mock-accent-bar" style="width: 8px; height: 8px; border-radius: 50%;"></span>
+          </div>
+
+          <div class="mock-card" id="mockCard">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span class="mock-title">Sari Berita Utama</span>
+              <span class="mock-accent-bar"></span>
+            </div>
+            <p class="mock-content" style="margin-top: 4px;">Koleksi teks dan maklumat penting dari carian web.</p>
+          </div>
+
+          <div class="mock-card" id="mockCard2">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span class="mock-title">Laporan Data</span>
+              <span class="mock-accent-bar"></span>
+            </div>
+            <p class="mock-content" style="margin-top: 4px; font-style: italic;">from www.seeport.io</p>
+          </div>
+
+          <div class="mock-button" id="mockBtn">Export Report</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast">Code copied to clipboard!</div>
+
+  <script>
+    const colorBgInput = document.getElementById('colorBg');
+    const colorTextInput = document.getElementById('colorText');
+    const colorCardInput = document.getElementById('colorCard');
+    const colorAccentInput = document.getElementById('colorAccent');
+
+    const labelBg = document.getElementById('labelBg');
+    const labelText = document.getElementById('labelText');
+    const labelCard = document.getElementById('labelCard');
+    const labelAccent = document.getElementById('labelAccent');
+
+    const mockPanel = document.getElementById('mockPanel');
+    const mockHeader = document.getElementById('mockHeader');
+    const mockCard = document.getElementById('mockCard');
+    const mockCard2 = document.getElementById('mockCard2');
+    const mockBtn = document.getElementById('mockBtn');
+
+    // Helper to update colors in preview
+    function updatePreview() {
+      const bgVal = colorBgInput.value;
+      const textVal = colorTextInput.value;
+      const cardVal = colorCardInput.value;
+      const accentVal = colorAccentInput.value;
+
+      labelBg.textContent = bgVal.toUpperCase();
+      labelText.textContent = textVal.toUpperCase();
+      labelCard.textContent = cardVal.toUpperCase();
+      labelAccent.textContent = accentVal.toUpperCase();
+
+      // Apply style variables to live preview
+      mockPanel.style.backgroundColor = bgVal;
+      mockPanel.style.color = textVal;
+      mockHeader.style.borderBottomColor = hexToRgba(textVal, 0.15);
+
+      mockCard.style.backgroundColor = cardVal;
+      mockCard.style.borderColor = hexToRgba(textVal, 0.15);
+      mockCard.style.color = textVal;
+
+      mockCard2.style.backgroundColor = cardVal;
+      mockCard2.style.borderColor = hexToRgba(textVal, 0.15);
+      mockCard2.style.color = textVal;
+
+      mockBtn.style.backgroundColor = accentVal;
+      mockBtn.style.color = getContrastYIQ(accentVal);
+
+      document.querySelectorAll('.mock-accent-bar').forEach(bar => {
+        bar.style.backgroundColor = accentVal;
+      });
+    }
+
+    // Helper to calculate best contrasting text color (black/white) for buttons
+    function getContrastYIQ(hexcolor){
+      hexcolor = hexcolor.replace("#", "");
+      var r = parseInt(hexcolor.substr(0,2),16);
+      var g = parseInt(hexcolor.substr(2,2),16);
+      var b = parseInt(hexcolor.substr(4,2),16);
+      var yiq = ((r*299)+(g*587)+(b*114))/1000;
+      return (yiq >= 128) ? '#18181b' : '#ffffff';
+    }
+
+    function hexToRgba(hex, alpha) {
+      hex = hex.replace('#', '');
+      if (hex.length === 3) {
+        hex = hex.split('').map(c => c + c).join('');
+      }
+      const r = parseInt(hex.substring(0, 2), 16);
+      const g = parseInt(hex.substring(2, 4), 16);
+      const b = parseInt(hex.substring(4, 6), 16);
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    // Bind event listeners for real-time live preview update
+    colorBgInput.addEventListener('input', updatePreview);
+    colorTextInput.addEventListener('input', updatePreview);
+    colorCardInput.addEventListener('input', updatePreview);
+    colorAccentInput.addEventListener('input', updatePreview);
+
+    // Initial preview setup
+    updatePreview();
+
+    // Form Submission to server
+    const themeForm = document.getElementById('themeForm');
+    const resultArea = document.getElementById('resultArea');
+    const codeBox = document.getElementById('codeBox');
+    const btnCopyCode = document.getElementById('btnCopyCode');
+    const toast = document.getElementById('toast');
+
+    themeForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const themeData = {
+        name: document.getElementById('themeName').value,
+        bgColor: colorBgInput.value,
+        textColor: colorTextInput.value,
+        cardBg: colorCardInput.value,
+        accentColor: colorAccentInput.value
+      };
+
+      try {
+        const response = await fetch('/api/themes', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(themeData)
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to create theme');
+        }
+
+        const result = await response.json();
+        
+        // Show result code
+        codeBox.textContent = result.code;
+        resultArea.style.display = 'block';
+        
+        // Scroll to result
+        resultArea.scrollIntoView({ behavior: 'smooth' });
+        showToast('Tema berjaya dicipta!');
+      } catch (err) {
+        alert('Ralat semasa mencipta tema: ' + err.message);
+      }
+    });
+
+    // Copy to clipboard action
+    btnCopyCode.addEventListener('click', () => {
+      navigator.clipboard.writeText(codeBox.textContent).then(() => {
+        showToast('Kod disalin ke papan klip!');
+      }).catch(err => {
+        alert('Gagal menyalin kod: ' + err);
+      });
+    });
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2000);
+    }
+  </script>
+</body>
+</html>
