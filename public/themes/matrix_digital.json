@@ -1,0 +1,17 @@
+{
+  "id": "theme_matrix_digital",
+  "name": "Matrix Digital",
+  "tier": "premium",
+  "price": 10.00,
+  "category": "Animated Themes",
+  "colors": {
+    "background": "#030704",
+    "text": "#39FF14",
+    "cardBackground": "#0B130E",
+    "primary": "#00FF66",
+    "accent": "#00FF66"
+  },
+  "animation": {
+    "type": "none"
+  }
+}

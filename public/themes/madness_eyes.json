@@ -1,0 +1,17 @@
+{
+  "id": "theme_madness_eyes",
+  "name": "Madness Eyes",
+  "tier": "premium",
+  "price": 8.00,
+  "category": "Animated Themes",
+  "colors": {
+    "background": "#0B090F",
+    "text": "#A855F7",
+    "cardBackground": "#16131F",
+    "primary": "#EC4899",
+    "accent": "#EC4899"
+  },
+  "animation": {
+    "type": "none"
+  }
+}

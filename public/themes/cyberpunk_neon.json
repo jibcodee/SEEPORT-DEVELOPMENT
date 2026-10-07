@@ -1,0 +1,17 @@
+{
+  "id": "theme_cyberpunk_neon",
+  "name": "Cyberpunk Neon",
+  "tier": "standard",
+  "price": 3.00,
+  "category": "Dark Themes",
+  "colors": {
+    "background": "#0B0813",
+    "text": "#FDFDFE",
+    "cardBackground": "#161224",
+    "primary": "#FF007F",
+    "accent": "#FF007F"
+  },
+  "animation": {
+    "type": "none"
+  }
+}

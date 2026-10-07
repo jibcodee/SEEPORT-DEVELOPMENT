@@ -1,0 +1,17 @@
+{
+  "id": "theme_pastel_lavender",
+  "name": "Pastel Lavender",
+  "tier": "standard",
+  "price": 3.00,
+  "category": "Dark Themes",
+  "colors": {
+    "background": "#F3F0FA",
+    "text": "#4A3E56",
+    "cardBackground": "#EAE3F2",
+    "primary": "#8B5CF6",
+    "accent": "#8B5CF6"
+  },
+  "animation": {
+    "type": "none"
+  }
+}

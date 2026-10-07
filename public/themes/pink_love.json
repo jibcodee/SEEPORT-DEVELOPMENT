@@ -1,0 +1,17 @@
+{
+  "id": "theme_pink_love",
+  "name": "Pink Love",
+  "tier": "premium",
+  "price": 5.00,
+  "category": "Animated Themes",
+  "colors": {
+    "background": "#FFF0F5",
+    "text": "#D02090",
+    "cardBackground": "#FFE4E1",
+    "primary": "#FF1493",
+    "accent": "#FF1493"
+  },
+  "animation": {
+    "type": "none"
+  }
+}
