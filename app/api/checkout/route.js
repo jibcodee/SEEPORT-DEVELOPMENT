@@ -2,9 +2,13 @@ import { NextResponse } from 'next/server';
 import { query } from '../../../lib/supabase';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder', {
-  apiVersion: '2023-10-16',
-});
+export const dynamic = 'force-dynamic';
+
+function getStripe() {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) throw new Error('STRIPE_SECRET_KEY is not set');
+  return new Stripe(key, { apiVersion: '2023-10-16' });
+}
 
 function generateRandomCode() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -90,6 +94,7 @@ export async function POST(request) {
     const host = request.headers.get('host');
     const baseUrl = `${protocol}://${host}`;
 
+    const stripe = getStripe();
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
